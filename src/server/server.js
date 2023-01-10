@@ -16,7 +16,7 @@ const initServer = async () => {
   ServerHelper.addViews(server);
 
   //Default Routes
-  ServerHelper.setDefaultRoute(server)
+  ServerHelper.setDefaultRoute(server);
 
   // Add routes to Swagger documentation
   ServerHelper.addSwaggerRoutes(server);
@@ -27,23 +27,24 @@ const initServer = async () => {
 
   // Start Server
   ServerHelper.startServer(server);
-}
+};
 
 /**
  * @author Sanchit Dang
  * @description Start HAPI Server
  */
 export const startMyServer = () => {
-
   ServerHelper.configureLog4js();
+
+  ServerHelper.connectMongoDB();
 
   // Global variable to get app root folder path
   ServerHelper.setGlobalAppRoot();
 
-  process.on("unhandledRejection", err => {
+  process.on("unhandledRejection", (err) => {
     appLogger.fatal(err);
     process.exit(1);
   });
 
   initServer();
-}
+};
