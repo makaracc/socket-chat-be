@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "npx babel-node src/entry.js",
+    "dev": "nodemon --exec npm start",
     "startWithNodemon": "nodemon --exec babel-node src/entry.js",
     "build": "npx babel src --out-dir build --ignore node_modules",
     "deployment": "node build/entry.js"
@@ -39,6 +40,7 @@
     "log4js": "6.3.0",
     "md5": "2.3.0",
     "moment": "2.29.1",
+    "mongoose": "^6.8.3",
     "path": "0.12.7",
     "randomstring": "1.1.5",
     "socket.io": "~4.0.0",
