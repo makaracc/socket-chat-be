@@ -2,7 +2,11 @@ import mongoose, { Schema } from "mongoose";
 import Config from "../config";
 
 const schedule = new Schema({
-  shift: { type: String },
+  shift: {
+    type: String,
+    enum: Object.values(Config.APP_CONSTANTS.DATABASE.SHIFT),
+    required: true,
+  },
   title: {
     type: String,
     trim: true,
