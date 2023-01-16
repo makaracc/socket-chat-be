@@ -708,68 +708,68 @@ const createSchedule = {
   },
 };
 
-// const getWardSchedule = {
-//   method: "GET",
-//   path: "/api/admin/getWardSchedule",
-//   options: {
-//     description: "get Ward Schedule",
-//     auth: "UserAuth",
-//     tags: ["api", "admin"],
-//     handler: function (request, h) {
-//       const userData =
-//         (request.auth &&
-//           request.auth.credentials &&
-//           request.auth.credentials.userData) ||
-//         null;
-//       return new Promise((resolve, reject) => {
-//         if (userData && userData._id) {
-//           Controller.AdminBaseController.getWardSchedule(
-//             userData,
-//             request.query,
-//             function (error, success) {
-//               if (error) {
-//                 reject(UniversalFunctions.sendError(error));
-//               } else {
-//                 resolve(
-//                   UniversalFunctions.sendSuccess(
-//                     UniversalFunctions.CONFIG.APP_CONSTANTS.STATUS_MSG.SUCCESS
-//                       .DEFAULT,
-//                     success
-//                   )
-//                 );
-//               }
-//             }
-//           );
-//         } else {
-//           reject(
-//             UniversalFunctions.sendError(
-//               UniversalFunctions.CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR
-//                 .INVALID_TOKEN
-//             )
-//           );
-//         }
-//       });
-//     },
-//     validate: {
-//       query: {
-//         ward: Joi.string()
-//           .required()
-//           .valid(...Config.APP_CONSTANTS.DATABASE.WARD_LIST),
-//         startDate: Joi.date().required(),
-//         endDate: Joi.date().required(),
-//       },
-//       failAction: UniversalFunctions.failActionFunction,
-//     },
-//     plugins: {
-//       "hapi-swagger": {
-//         security: [{ admin: {} }],
-//         responseMessages:
-//           UniversalFunctions.CONFIG.APP_CONSTANTS
-//             .swaggerDefaultResponseMessages,
-//       },
-//     },
-//   },
-// };
+const getSchedule = {
+  method: "GET",
+  path: "/api/admin/getSchedule",
+  options: {
+    description: "get shift Schedule",
+    auth: "UserAuth",
+    tags: ["api", "admin"],
+    handler: function (request, h) {
+      const userData =
+        (request.auth &&
+          request.auth.credentials &&
+          request.auth.credentials.userData) ||
+        null;
+      return new Promise((resolve, reject) => {
+        if (userData && userData._id) {
+          Controller.AdminBaseController.getSchedule(
+            userData,
+            request.query,
+            function (error, success) {
+              if (error) {
+                reject(UniversalFunctions.sendError(error));
+              } else {
+                resolve(
+                  UniversalFunctions.sendSuccess(
+                    UniversalFunctions.CONFIG.APP_CONSTANTS.STATUS_MSG.SUCCESS
+                      .DEFAULT,
+                    success
+                  )
+                );
+              }
+            }
+          );
+        } else {
+          reject(
+            UniversalFunctions.sendError(
+              UniversalFunctions.CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR
+                .INVALID_TOKEN
+            )
+          );
+        }
+      });
+    },
+    validate: {
+      query: {
+        shift: Joi.string()
+          .required()
+          .valid(...Config.APP_CONSTANTS.DATABASE.SHIFT_LIST),
+        title: Joi.string().optional(),
+        description: Joi.string().optional(),
+      },
+      failAction: UniversalFunctions.failActionFunction,
+    },
+    plugins: {
+      "hapi-swagger": {
+        security: [{ admin: {} }],
+        responseMessages:
+          UniversalFunctions.CONFIG.APP_CONSTANTS
+            .swaggerDefaultResponseMessages,
+      },
+    },
+  },
+};
 
 export default [
   adminLogin,
@@ -780,4 +780,5 @@ export default [
   changePassword,
   logoutAdmin,
   createSchedule,
+  getSchedule,
 ];

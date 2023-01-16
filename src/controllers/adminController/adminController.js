@@ -352,202 +352,202 @@ var blockUnblockAdmin = function (userData, payloadData, callback) {
   );
 };
 
-const createNurse = function (userData, payloadData, callback) {
-  let newUserData;
-  let userFound = false;
-  async.series(
-    [
-      function (cb) {
-        var criteria = {
-          _id: userData.adminId,
-        };
-        Service.AdminService.getRecord(
-          criteria,
-          { password: 0 },
-          {},
-          function (err, data) {
-            if (err) cb(err);
-            else {
-              if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
-              else {
-                userFound = (data && data[0]) || null;
-                cb();
-              }
-            }
-          }
-        );
-      },
-      function (cb) {
-        Service.UserService.getRecord(
-          { username: payloadData.nurseId },
-          {},
-          {},
-          function (err, data) {
-            if (err) cb(err);
-            else {
-              if (data.length != 0) cb(ERROR.USER_ALREADY_REGISTERED);
-              else cb();
-            }
-          }
-        );
-      },
-      function (cb) {
-        let dataToSave = {
-          firstName: payloadData.firstName,
-          lastName: payloadData.lastName,
-          username: payloadData.nurseId,
-          password: UniversalFunctions.CryptData(payloadData.password),
-          dob: payloadData.dob,
-          phoneNumber: encryptString(payloadData.phoneNumber),
-          registrationDate: new Date().toISOString(),
-          firstLogin: true,
-          userType: Config.APP_CONSTANTS.DATABASE.USER_ROLES.NURSE,
-        };
-        Service.UserService.createRecord(dataToSave, function (err, data) {
-          if (err) cb(err);
-          else {
-            newUserData = data;
-            cb();
-          }
-        });
-      },
-    ],
-    function (err, result) {
-      if (err) callback(err);
-      else
-        callback(null, {
-          userData: UniversalFunctions.processUserData(newUserData),
-        });
-    }
-  );
-};
+// const createNurse = function (userData, payloadData, callback) {
+//   let newUserData;
+//   let userFound = false;
+//   async.series(
+//     [
+//       function (cb) {
+//         var criteria = {
+//           _id: userData.adminId,
+//         };
+//         Service.AdminService.getRecord(
+//           criteria,
+//           { password: 0 },
+//           {},
+//           function (err, data) {
+//             if (err) cb(err);
+//             else {
+//               if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
+//               else {
+//                 userFound = (data && data[0]) || null;
+//                 cb();
+//               }
+//             }
+//           }
+//         );
+//       },
+//       function (cb) {
+//         Service.UserService.getRecord(
+//           { username: payloadData.nurseId },
+//           {},
+//           {},
+//           function (err, data) {
+//             if (err) cb(err);
+//             else {
+//               if (data.length != 0) cb(ERROR.USER_ALREADY_REGISTERED);
+//               else cb();
+//             }
+//           }
+//         );
+//       },
+//       function (cb) {
+//         let dataToSave = {
+//           firstName: payloadData.firstName,
+//           lastName: payloadData.lastName,
+//           username: payloadData.nurseId,
+//           password: UniversalFunctions.CryptData(payloadData.password),
+//           dob: payloadData.dob,
+//           phoneNumber: encryptString(payloadData.phoneNumber),
+//           registrationDate: new Date().toISOString(),
+//           firstLogin: true,
+//           userType: Config.APP_CONSTANTS.DATABASE.USER_ROLES.NURSE,
+//         };
+//         Service.UserService.createRecord(dataToSave, function (err, data) {
+//           if (err) cb(err);
+//           else {
+//             newUserData = data;
+//             cb();
+//           }
+//         });
+//       },
+//     ],
+//     function (err, result) {
+//       if (err) callback(err);
+//       else
+//         callback(null, {
+//           userData: UniversalFunctions.processUserData(newUserData),
+//         });
+//     }
+//   );
+// };
 
-const getPatients = (userData, callback) => {
-  let userList = [];
-  let userFound = false;
-  async.series(
-    [
-      function (cb) {
-        const criteria = {
-          _id: userData.adminId,
-        };
-        Service.AdminService.getRecord(
-          criteria,
-          { password: 0 },
-          {},
-          function (err, data) {
-            if (err) cb(err);
-            else {
-              if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
-              else {
-                userFound = (data && data[0]) || null;
-                if (userFound.isBlocked == true) cb(ERROR.ACCOUNT_BLOCKED);
-                else cb();
-              }
-            }
-          }
-        );
-      },
-      function (cb) {
-        const criteria = {
-          userType:
-            UniversalFunctions.CONFIG.APP_CONSTANTS.DATABASE.USER_ROLES.PATIENT,
-        };
-        const projection = {
-          accessToken: 0,
-          OTPCode: 0,
-          code: 0,
-          codeUpdatedAt: 0,
-          __v: 0,
-          registrationDate: 0,
-          dob: 0,
-        };
-        Service.UserService.getRecord(
-          criteria,
-          projection,
-          {},
-          function (err, data) {
-            if (err) cb(err);
-            else {
-              userList = data.map((element) => {
-                return UniversalFunctions.processUserData(element);
-              });
-              cb();
-            }
-          }
-        );
-      },
-    ],
-    function (err, result) {
-      if (err) callback(err);
-      else callback(null, { data: userList });
-    }
-  );
-};
+// const getPatients = (userData, callback) => {
+//   let userList = [];
+//   let userFound = false;
+//   async.series(
+//     [
+//       function (cb) {
+//         const criteria = {
+//           _id: userData.adminId,
+//         };
+//         Service.AdminService.getRecord(
+//           criteria,
+//           { password: 0 },
+//           {},
+//           function (err, data) {
+//             if (err) cb(err);
+//             else {
+//               if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
+//               else {
+//                 userFound = (data && data[0]) || null;
+//                 if (userFound.isBlocked == true) cb(ERROR.ACCOUNT_BLOCKED);
+//                 else cb();
+//               }
+//             }
+//           }
+//         );
+//       },
+//       function (cb) {
+//         const criteria = {
+//           userType:
+//             UniversalFunctions.CONFIG.APP_CONSTANTS.DATABASE.USER_ROLES.PATIENT,
+//         };
+//         const projection = {
+//           accessToken: 0,
+//           OTPCode: 0,
+//           code: 0,
+//           codeUpdatedAt: 0,
+//           __v: 0,
+//           registrationDate: 0,
+//           dob: 0,
+//         };
+//         Service.UserService.getRecord(
+//           criteria,
+//           projection,
+//           {},
+//           function (err, data) {
+//             if (err) cb(err);
+//             else {
+//               userList = data.map((element) => {
+//                 return UniversalFunctions.processUserData(element);
+//               });
+//               cb();
+//             }
+//           }
+//         );
+//       },
+//     ],
+//     function (err, result) {
+//       if (err) callback(err);
+//       else callback(null, { data: userList });
+//     }
+//   );
+// };
 
-const getNurses = (userData, callback) => {
-  let userList = [];
-  let userFound = false;
-  async.series(
-    [
-      function (cb) {
-        const criteria = {
-          _id: userData.adminId,
-        };
-        Service.AdminService.getRecord(
-          criteria,
-          { password: 0 },
-          {},
-          function (err, data) {
-            if (err) cb(err);
-            else {
-              if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
-              else {
-                userFound = (data && data[0]) || null;
-                if (userFound.isBlocked == true) cb(ERROR.ACCOUNT_BLOCKED);
-                else cb();
-              }
-            }
-          }
-        );
-      },
-      function (cb) {
-        const criteria = {
-          userType:
-            UniversalFunctions.CONFIG.APP_CONSTANTS.DATABASE.USER_ROLES.NURSE,
-        };
-        const projection = {
-          accessToken: 0,
-          OTPCode: 0,
-          code: 0,
-          codeUpdatedAt: 0,
-          registrationDate: 0,
-          password: 0,
-          dob: 0,
-          __v: 0,
-        };
-        Service.UserService.getRecord(
-          criteria,
-          projection,
-          {},
-          function (err, data) {
-            if (err) cb(err);
-            else {
-              userList = data.map((element) => {
-                return UniversalFunctions.processUserData(element);
-              });
-              cb();
-            }
-          }
-        );
-      },
-    ],
-    function (err, result) {
-      if (err) callback(err);
-      else callback(null, { data: userList });
-    }
-  );
-};
+// const getNurses = (userData, callback) => {
+//   let userList = [];
+//   let userFound = false;
+//   async.series(
+//     [
+//       function (cb) {
+//         const criteria = {
+//           _id: userData.adminId,
+//         };
+//         Service.AdminService.getRecord(
+//           criteria,
+//           { password: 0 },
+//           {},
+//           function (err, data) {
+//             if (err) cb(err);
+//             else {
+//               if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
+//               else {
+//                 userFound = (data && data[0]) || null;
+//                 if (userFound.isBlocked == true) cb(ERROR.ACCOUNT_BLOCKED);
+//                 else cb();
+//               }
+//             }
+//           }
+//         );
+//       },
+//       function (cb) {
+//         const criteria = {
+//           userType:
+//             UniversalFunctions.CONFIG.APP_CONSTANTS.DATABASE.USER_ROLES.NURSE,
+//         };
+//         const projection = {
+//           accessToken: 0,
+//           OTPCode: 0,
+//           code: 0,
+//           codeUpdatedAt: 0,
+//           registrationDate: 0,
+//           password: 0,
+//           dob: 0,
+//           __v: 0,
+//         };
+//         Service.UserService.getRecord(
+//           criteria,
+//           projection,
+//           {},
+//           function (err, data) {
+//             if (err) cb(err);
+//             else {
+//               userList = data.map((element) => {
+//                 return UniversalFunctions.processUserData(element);
+//               });
+//               cb();
+//             }
+//           }
+//         );
+//       },
+//     ],
+//     function (err, result) {
+//       if (err) callback(err);
+//       else callback(null, { data: userList });
+//     }
+//   );
+// };
 
 var blockUnblockUser = function (userData, payloadData, callback) {
   let userFound;
@@ -1118,75 +1118,55 @@ const createSchedule = function (userData, payloadData, callback) {
  *
  * @param {Object} userData
  * @param {Object} payloadData
- * @param {Date} payloadData.startDate
- * @param {Date} payloadData.endDate
- * @param {String} payloadData.ward
+ * @param {Enumerator} payloadData.shift
+ * @param {string} payloadData.title
+ * @param {String} payloadData.description
  * @param {Function} callback
  */
-// const getWardSchedule = function (userData, payloadData, callback) {
-//   let userFound, wardScheduleData;
-//   async.series(
-//     [
-//       function (cb) {
-//         const criteria = {
-//           _id: userData.adminId,
-//         };
-//         Service.AdminService.getRecord(criteria, {}, {}, function (err, data) {
-//           if (err) cb(err);
-//           else {
-//             if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
-//             else {
-//               userFound = (data && data[0]) || null;
-//               if (userFound.isBlocked) cb(ERROR.ACCOUNT_BLOCKED);
-//               else cb();
-//             }
-//           }
-//         });
-//       },
-//       function (cb) {
-//         var criteria = {
-//           $and: [
-//             {
-//               ward: payloadData.ward,
-//             },
-//             {
-//               $or: [
-//                 {
-//                   startTime: {
-//                     $gte: payloadData.startDate.toISOString(),
-//                     $lte: payloadData.endDate.toISOString(),
-//                   },
-//                 },
-//                 {
-//                   endTime: {
-//                     $gte: payloadData.startDate.toISOString(),
-//                     $lte: payloadData.endDate.toISOString(),
-//                   },
-//                 },
-//               ],
-//             },
-//           ],
-//         };
-//         Service.CalendarService.getRecord(
-//           criteria,
-//           {},
-//           {},
-//           function (err, data) {
-//             if (err) cb(err);
-//             else {
-//               wardScheduleData = data;
-//               cb();
-//             }
-//           }
-//         );
-//       },
-//     ],
-//     function (err, result) {
-//       if (err) callback(err);
-//       else callback(null, { data: wardScheduleData });
-//     }
-//   );
-// };
+const getSchedule = function (userData, payloadData, callback) {
+  let userFound, shiftScheduleData;
+  async.series(
+    [
+      function (cb) {
+        const criteria = {
+          _id: userData.adminId,
+        };
+        Service.AdminService.getRecord(criteria, {}, {}, function (err, data) {
+          if (err) cb(err);
+          else {
+            if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
+            else {
+              userFound = (data && data[0]) || null;
+              if (userFound.isBlocked) cb(ERROR.ACCOUNT_BLOCKED);
+              else cb();
+            }
+          }
+        });
+      },
+      function (cb) {
+        var criteria = {
+          $and: [{ shift: payloadData.shift }],
+        };
+        Service.SchedulingService.getRecord(
+          criteria,
+          {},
+          {},
+          function (err, data) {
+            if (err) cb(err);
+            else {
+              shiftScheduleData = data;
+              cb();
+            }
+          }
+        );
+      },
+    ],
+    function (err, result) {
+      if (err) callback(err);
+      else callback(null, { data: shiftScheduleData });
+    }
+  );
+};
 
 export default {
   adminLogin,
@@ -1194,9 +1174,9 @@ export default {
   createAdmin,
   getAdmin,
   blockUnblockAdmin,
-  createNurse,
-  getPatients,
-  getNurses,
+  // createNurse,
+  // getPatients,
+  // getNurses,
   blockUnblockUser,
   changePassword,
   logoutAdmin,
@@ -1204,5 +1184,5 @@ export default {
   // createNurseShifts,
   // getNurseShifts,
   createSchedule,
-  // getWardSchedule,
+  getSchedule,
 };
