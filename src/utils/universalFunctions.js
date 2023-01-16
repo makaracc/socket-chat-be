@@ -1,15 +1,13 @@
-
-
 /**
-* Please use appLogger for logging in this file try to abstain from console
-* levels of logging:
-* - TRACE - ‘blue’
-* - DEBUG - ‘cyan’
-* - INFO - ‘green’
-* - WARN - ‘yellow’
-* - ERROR - ‘red’
-* - FATAL - ‘magenta’
-*/
+ * Please use appLogger for logging in this file try to abstain from console
+ * levels of logging:
+ * - TRACE - ‘blue’
+ * - DEBUG - ‘cyan’
+ * - INFO - ‘green’
+ * - WARN - ‘yellow’
+ * - ERROR - ‘red’
+ * - FATAL - ‘magenta’
+ */
 import Joi from "joi";
 import MD5 from "md5";
 import Boom from "@hapi/boom";
@@ -17,78 +15,121 @@ import CONFIG from "../config";
 import randomstring from "randomstring";
 import validator from "validator";
 import moment from "moment";
+import StringCrypto from "string-crypto";
 
+const { encryptString, decryptString } = new StringCrypto();
 
 const sendError = (data) => {
-  console.trace('ERROR OCCURED ', data)
-  if (typeof data == 'object' && data.hasOwnProperty('statusCode') && data.hasOwnProperty('customMessage')) {
-    appLogger.info('attaching resposnetype', data.type)
-    let errorToSend = new Boom.Boom(data.customMessage, { statusCode: data.statusCode });
+  console.trace("ERROR OCCURED ", data);
+  if (
+    typeof data == "object" &&
+    data.hasOwnProperty("statusCode") &&
+    data.hasOwnProperty("customMessage")
+  ) {
+    appLogger.info("attaching resposnetype", data.type);
+    let errorToSend = new Boom.Boom(data.customMessage, {
+      statusCode: data.statusCode,
+    });
     errorToSend.output.payload.responseType = data.type;
     return errorToSend;
   } else {
-    let errorToSend = '';
-    if (typeof data == 'object') {
-      if (data.name == 'MongoError') {
-        errorToSend += CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DB_ERROR.customMessage;
-        if (data.code = 11000) {
-          let duplicateValue = data.errmsg && data.errmsg.substr(data.errmsg.lastIndexOf('{ : "') + 5);
-          duplicateValue = duplicateValue.replace('}', '');
-          errorToSend += CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DUPLICATE.customMessage + " : " + duplicateValue;
-          if (data.message.indexOf('customer_1_streetAddress_1_city_1_state_1_country_1_zip_1') > -1) {
-            errorToSend = CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DUPLICATE_ADDRESS.customMessage;
+    let errorToSend = "";
+    if (typeof data == "object") {
+      if (data.name == "MongoError") {
+        errorToSend +=
+          CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DB_ERROR.customMessage;
+        if ((data.code = 11000)) {
+          let duplicateValue =
+            data.errmsg &&
+            data.errmsg.substr(data.errmsg.lastIndexOf('{ : "') + 5);
+          duplicateValue = duplicateValue.replace("}", "");
+          errorToSend +=
+            CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DUPLICATE.customMessage +
+            " : " +
+            duplicateValue;
+          if (
+            data.message.indexOf(
+              "customer_1_streetAddress_1_city_1_state_1_country_1_zip_1"
+            ) > -1
+          ) {
+            errorToSend =
+              CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DUPLICATE_ADDRESS
+                .customMessage;
           }
         }
-      } else if (data.name == 'ApplicationError') {
-        errorToSend += CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.APP_ERROR.customMessage + ' : ';
-      } else if (data.name == 'ValidationError') {
-        errorToSend += CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.APP_ERROR.customMessage + data.message;
-      } else if (data.name == 'CastError') {
-        errorToSend += CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DB_ERROR.customMessage + CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.INVALID_ID.customMessage + data.value;
+      } else if (data.name == "ApplicationError") {
+        errorToSend +=
+          CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.APP_ERROR.customMessage + " : ";
+      } else if (data.name == "ValidationError") {
+        errorToSend +=
+          CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.APP_ERROR.customMessage +
+          data.message;
+      } else if (data.name == "CastError") {
+        errorToSend +=
+          CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.DB_ERROR.customMessage +
+          CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR.INVALID_ID.customMessage +
+          data.value;
       }
     } else {
-      errorToSend = data
+      errorToSend = data;
     }
     var customErrorMessage = errorToSend;
-    if (typeof customErrorMessage == 'string') {
+    if (typeof customErrorMessage == "string") {
       if (errorToSend.indexOf("[") > -1) {
         customErrorMessage = errorToSend.substr(errorToSend.indexOf("["));
       }
-      customErrorMessage = customErrorMessage && customErrorMessage.replace(/"/g, '');
-      customErrorMessage = customErrorMessage && customErrorMessage.replace('[', '');
-      customErrorMessage = customErrorMessage && customErrorMessage.replace(']', '');
+      customErrorMessage =
+        customErrorMessage && customErrorMessage.replace(/"/g, "");
+      customErrorMessage =
+        customErrorMessage && customErrorMessage.replace("[", "");
+      customErrorMessage =
+        customErrorMessage && customErrorMessage.replace("]", "");
     }
-    return new Boom.Boom(customErrorMessage, { statusCode: 400 })
+    return new Boom.Boom(customErrorMessage, { statusCode: 400 });
   }
+};
+
+var processUserData = function (userObj) {
+  appLogger.info("obj>>", userObj);
+  return userObj;
 };
 
 const sendSuccess = (successMsg, data) => {
-  successMsg = successMsg || CONFIG.APP_CONSTANTS.STATUS_MSG.SUCCESS.DEFAULT.customMessage;
-  if (typeof successMsg == 'object' && successMsg.hasOwnProperty('statusCode') && successMsg.hasOwnProperty('customMessage')) {
-    return { statusCode: successMsg.statusCode, message: successMsg.customMessage, data: data || {} };
-
+  successMsg =
+    successMsg || CONFIG.APP_CONSTANTS.STATUS_MSG.SUCCESS.DEFAULT.customMessage;
+  if (
+    typeof successMsg == "object" &&
+    successMsg.hasOwnProperty("statusCode") &&
+    successMsg.hasOwnProperty("customMessage")
+  ) {
+    return {
+      statusCode: successMsg.statusCode,
+      message: successMsg.customMessage,
+      data: data || {},
+    };
   } else {
     return { statusCode: 200, message: successMsg, data: data || {} };
-
   }
 };
 const failActionFunction = (request, reply, error) => {
-  var customErrorMessage = '';
+  var customErrorMessage = "";
   if (error.output.payload.message.indexOf("[") > -1) {
-    customErrorMessage = error.output.payload.message.substr(error.output.payload.message.indexOf("["));
+    customErrorMessage = error.output.payload.message.substr(
+      error.output.payload.message.indexOf("[")
+    );
   } else {
     customErrorMessage = error.output.payload.message;
   }
-  customErrorMessage = customErrorMessage.replace(/"/g, '');
-  customErrorMessage = customErrorMessage.replace('[', '');
-  customErrorMessage = customErrorMessage.replace(']', '');
+  customErrorMessage = customErrorMessage.replace(/"/g, "");
+  customErrorMessage = customErrorMessage.replace("[", "");
+  customErrorMessage = customErrorMessage.replace("]", "");
   error.output.payload.message = customErrorMessage;
-  delete error.output.payload.validation
+  delete error.output.payload.validation;
   return error;
 };
 
 const authorizationHeaderObj = Joi.object({
-  authorization: Joi.string().required()
+  authorization: Joi.string().required(),
 }).options({ allowUnknown: true });
 
 const generateRandomString = (stringLength) => {
@@ -102,15 +143,15 @@ const generateRandomNumber = () => {
 };
 
 const generateRandomAlphabet = function (len) {
-  var charSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  var randomString = '';
+  var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  var randomString = "";
   for (var i = 0; i < len; i++) {
     var randomPoz = Math.floor(Math.random() * charSet.length);
     randomString += charSet.substring(randomPoz, randomPoz + 1);
     randomString = randomString.toUpperCase();
   }
   return randomString;
-}
+};
 
 const CryptData = (stringToCrypt) => {
   return MD5(MD5(stringToCrypt));
@@ -133,22 +174,24 @@ const validateString = (str, pattern) => {
 };
 
 const verifyEmailFormat = (string) => {
-  return validator.isEmail(string)
+  return validator.isEmail(string);
 };
 var deleteUnnecessaryUserData = function (userObj) {
-  appLogger.info('deleting>>', userObj)
+  appLogger.info("deleting>>", userObj);
   delete userObj.__v;
   delete userObj.password;
   delete userObj.registrationDate;
   delete userObj.OTPCode;
-  appLogger.info('deleted', userObj)
+  appLogger.info("deleted", userObj);
   return userObj;
 };
-var generateFilenameWithExtension = function generateFilenameWithExtension(oldFilename, newFilename) {
+var generateFilenameWithExtension = function generateFilenameWithExtension(
+  oldFilename,
+  newFilename
+) {
   var ext = oldFilename.substr((~-oldFilename.lastIndexOf(".") >>> 0) + 2);
-  return newFilename + '.' + ext;
-}
-
+  return newFilename + "." + ext;
+};
 
 function isEmpty(obj) {
   // null and undefined are "empty"
@@ -170,52 +213,49 @@ function isEmpty(obj) {
 }
 
 var getTimestamp = function (inDate) {
-  if (inDate)
-    return new Date();
+  if (inDate) return new Date();
 
   return new Date().toISOString();
 };
 
 var createArray = function (List, keyName) {
-  appLogger.info("create array------>>>>>>>")
+  appLogger.info("create array------>>>>>>>");
   var IdArray = [];
   var keyName = keyName;
   for (var key in List) {
     if (List.hasOwnProperty(key)) {
       //logger.debug(data[key][keyName]);
-      IdArray.push((List[key][keyName]).toString());
+      IdArray.push(List[key][keyName].toString());
     }
   }
   return IdArray;
-
 };
 function getRange(startDate, endDate, diffIn) {
-
   var dr = moment.range(startDate, endDate);
 
-  if (!diffIn)
-    diffIn = CONFIG.APP_CONSTANTS.TIME_UNITS.HOURS;
-  if (diffIn == "milli")
-    return dr.diff();
+  if (!diffIn) diffIn = CONFIG.APP_CONSTANTS.TIME_UNITS.HOURS;
+  if (diffIn == "milli") return dr.diff();
 
   return dr.diff(diffIn);
-
 }
 
 var checkFileExtension = function (fileName) {
-  return fileName.substring(fileName.lastIndexOf('.') + 1, fileName.length) || fileName;
-}
+  return (
+    fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length) ||
+    fileName
+  );
+};
 
 /**
  * @author Sanchit Dang
- * 
+ *
  * @param {Object} obj Object to clean.
  * @param {Function} callback callback function which returns cleaned object.
- * @returns {Object} Cleaned Version of the object. 
+ * @returns {Object} Cleaned Version of the object.
  */
 const cleanObject = (obj, callback) => {
   let newObj = Object.keys(obj)
-    .filter(k => obj[k] != undefined && obj[k] != null && obj[k] != '') // Remove undef. and null.
+    .filter((k) => obj[k] != undefined && obj[k] != null && obj[k] != "") // Remove undef. and null.
     .reduce(
       (newObj, k) =>
         typeof obj[k] === "object"
@@ -223,10 +263,9 @@ const cleanObject = (obj, callback) => {
           : { ...newObj, [k]: obj[k] }, // Copy value.
       {}
     );
-  if (callback instanceof Function)
-    callback(newObj);
+  if (callback instanceof Function) callback(newObj);
   return newObj;
-}
+};
 
 const universalFunctions = {
   generateRandomString,
@@ -248,7 +287,8 @@ const universalFunctions = {
   generateRandomAlphabet,
   getRange,
   checkFileExtension,
-  cleanObject
+  cleanObject,
+  processUserData,
 };
 
 export default universalFunctions;
