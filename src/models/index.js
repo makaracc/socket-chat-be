@@ -2,8 +2,12 @@
  * Created by Navit
  */
 
-import schedule from "./schedule";
+import Schedule from "./schedule";
+import Admin from "./admin";
+import Token from "./token";
 
 export default {
-  schedule,
+  Schedule,
+  Admin,
+  Token,
 };
