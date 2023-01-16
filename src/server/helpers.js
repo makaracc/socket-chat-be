@@ -7,6 +7,7 @@ import CONFIG from "../config/index";
 import Path from "path";
 import Routes from "../routes";
 import mongoose from "mongoose";
+import BootStrap from "../utils/bootStrap";
 
 /**
  * @description Helper file for the server
@@ -14,6 +15,12 @@ import mongoose from "mongoose";
 class ServerHelper {
   setGlobalAppRoot() {
     global.appRoot = Path.resolve(__dirname);
+  }
+
+  bootstrap() {
+    BootStrap.bootstrapAdmin(function (err) {
+      if (err) appLogger.debug(err);
+    });
   }
 
   /**

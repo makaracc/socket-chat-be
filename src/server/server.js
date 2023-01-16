@@ -21,6 +21,8 @@ const initServer = async () => {
   // Add routes to Swagger documentation
   ServerHelper.addSwaggerRoutes(server);
 
+  ServerHelper.bootstrap();
+
   SocketManager.connectSocket(server);
 
   ServerHelper.attachLoggerOnEvents(server);
