@@ -1147,18 +1147,55 @@ const getSchedule = function (userData, payloadData, callback) {
         var criteria = {
           $and: [{ shift: payloadData.shift }],
         };
-        Service.SchedulingService.getRecord(
-          criteria,
-          {},
-          {},
-          function (err, data) {
-            if (err) cb(err);
+        Service.SchedulingService.getRecord({}, {}, {}, function (err, data) {
+          if (err) cb(err);
+          else {
+            shiftScheduleData = data;
+            cb();
+          }
+        });
+      },
+    ],
+    function (err, result) {
+      if (err) callback(err);
+      else callback(null, { data: shiftScheduleData });
+    }
+  );
+};
+
+// delete schedule from shift id
+const deleteSchedule = function (userData, payloadData, callback) {
+  let userFound, shiftScheduleData;
+  async.series(
+    [
+      function (cb) {
+        const criteria = {
+          _id: userData.adminId,
+        };
+        Service.AdminService.getRecord(criteria, {}, {}, function (err, data) {
+          if (err) cb(err);
+          else {
+            if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
             else {
-              shiftScheduleData = data;
-              cb();
+              userFound = (data && data[0]) || null;
+              if (userFound.isBlocked) cb(ERROR.ACCOUNT_BLOCKED);
+              else cb();
             }
           }
-        );
+        });
+      },
+      // delete schedule from shift id
+      function (cb) {
+        var criteria = {
+          _id: payloadData._id,
+        };
+        Service.SchedulingService.deleteRecord(criteria, (err, data) => {
+          if (err) cb(err);
+          else {
+            shiftScheduleData = data;
+            cb();
+          }
+        });
       },
     ],
     function (err, result) {
@@ -1185,4 +1222,5 @@ export default {
   // getNurseShifts,
   createSchedule,
   getSchedule,
+  deleteSchedule,
 };
