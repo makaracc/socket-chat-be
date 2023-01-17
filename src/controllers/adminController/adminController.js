@@ -1113,7 +1113,6 @@ const deleteSchedule = function (userData, payloadData, callback) {
           }
         });
       },
-      // delete schedule from shift id
       function (cb) {
         var criteria = {
           _id: payloadData._id,
@@ -1187,6 +1186,61 @@ const createUser = function (userData, payloadData, callback) {
   );
 };
 
+const getAllUser = function (userData, callback) {
+  let userList = [];
+  let userFound = false;
+  async.series(
+    [
+      function (cb) {
+        var criteria = {
+          _id: userData.adminId,
+        };
+        Service.AdminService.getRecord(
+          criteria,
+          { password: 0 },
+          {},
+          function (err, data) {
+            if (err) cb(err);
+            else {
+              if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
+              else {
+                userFound = (data && data[0]) || null;
+                if (
+                  userFound.userType !=
+                    Config.APP_CONSTANTS.DATABASE.USER_ROLES.SUPERADMIN &&
+                  userFound.userType !=
+                    Config.APP_CONSTANTS.DATABASE.USER_ROLES.ADMIN
+                ) {
+                  appLogger.info(userFound.userType);
+                  cb(ERROR.PRIVILEGE_MISMATCH);
+                } else cb();
+              }
+            }
+          }
+        );
+      },
+      function (cb) {
+        Service.UserService.getRecord(
+          {},
+          { password: 0, __v: 0, createdAt: 0, userType: 0, updatedAt: 0 },
+          {},
+          function (err, data) {
+            if (err) cb(err);
+            else {
+              userList = data;
+              cb();
+            }
+          }
+        );
+      },
+    ],
+    function (err, result) {
+      if (err) callback(err);
+      else callback(null, { data: userList });
+    }
+  );
+};
+
 export default {
   adminLogin,
   accessTokenLogin,
@@ -1205,4 +1259,5 @@ export default {
   getAllSchedule,
   deleteSchedule,
   createUser,
+  getAllUser,
 };

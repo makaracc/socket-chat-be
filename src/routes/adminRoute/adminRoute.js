@@ -141,7 +141,7 @@ const createAdmin = {
   },
 };
 
-const getAdmin = {
+const getAllAdmin = {
   method: "GET",
   path: "/api/admin/getAllAdmin",
   handler: function (request, h) {
@@ -711,7 +711,7 @@ const createSchedule = {
   },
 };
 
-const getSchedule = {
+const getAllSchedule = {
   method: "GET",
   path: "/api/admin/getAllSchedule",
   options: {
@@ -900,16 +900,54 @@ const createUser = {
   },
 };
 
+const getAllUser = {
+  method: "GET",
+  path: "/api/admin/getAllUser",
+  handler: function (request, h) {
+    let userData =
+      (request.auth &&
+        request.auth.credentials &&
+        request.auth.credentials.userData) ||
+      null;
+    return new Promise((resolve, reject) => {
+      Controller.AdminBaseController.getAllUser(userData, function (err, data) {
+        if (!err) {
+          resolve(UniversalFunctions.sendSuccess(null, data));
+        } else {
+          reject(UniversalFunctions.sendError(err));
+        }
+      });
+    });
+  },
+  config: {
+    description: "get all user",
+    tags: ["api", "admin"],
+    auth: "UserAuth",
+    validate: {
+      failAction: UniversalFunctions.failActionFunction,
+    },
+    plugins: {
+      "hapi-swagger": {
+        security: [{ admin: {} }],
+        responseMessages:
+          UniversalFunctions.CONFIG.APP_CONSTANTS
+            .swaggerDefaultResponseMessages,
+      },
+    },
+  },
+};
+
 export default [
   adminLogin,
   accessTokenLogin,
   createAdmin,
-  getAdmin,
+  getAllAdmin,
   blockUnblockAdmin,
   changePassword,
   logoutAdmin,
   createSchedule,
-  getSchedule,
+  getAllSchedule,
   deleteSchedule,
   createUser,
+  getAllUser,
 ];
