@@ -143,7 +143,7 @@ const createAdmin = {
 
 const getAdmin = {
   method: "GET",
-  path: "/api/admin/getAdmin",
+  path: "/api/admin/getAllAdmin",
   handler: function (request, h) {
     let userData =
       (request.auth &&
@@ -151,17 +151,20 @@ const getAdmin = {
         request.auth.credentials.userData) ||
       null;
     return new Promise((resolve, reject) => {
-      Controller.AdminBaseController.getAdmin(userData, function (err, data) {
-        if (!err) {
-          resolve(UniversalFunctions.sendSuccess(null, data));
-        } else {
-          reject(UniversalFunctions.sendError(err));
+      Controller.AdminBaseController.getAllAdmin(
+        userData,
+        function (err, data) {
+          if (!err) {
+            resolve(UniversalFunctions.sendSuccess(null, data));
+          } else {
+            reject(UniversalFunctions.sendError(err));
+          }
         }
-      });
+      );
     });
   },
   config: {
-    description: "get all sub admin list",
+    description: "get all admin",
     tags: ["api", "admin"],
     auth: "UserAuth",
     validate: {
@@ -710,9 +713,9 @@ const createSchedule = {
 
 const getSchedule = {
   method: "GET",
-  path: "/api/admin/getSchedule",
+  path: "/api/admin/getAllSchedule",
   options: {
-    description: "get shift Schedule",
+    description: "get all shift Schedule",
     auth: "UserAuth",
     tags: ["api", "admin"],
     handler: function (request, h) {
@@ -723,7 +726,7 @@ const getSchedule = {
         null;
       return new Promise((resolve, reject) => {
         if (userData && userData._id) {
-          Controller.AdminBaseController.getSchedule(
+          Controller.AdminBaseController.getAllSchedule(
             userData,
             request.query,
             function (error, success) {
@@ -828,6 +831,75 @@ const deleteSchedule = {
   },
 };
 
+const createUser = {
+  method: "POST",
+  path: "/api/admin/createUser",
+  handler: function (request, h) {
+    let userData =
+      (request.auth &&
+        request.auth.credentials &&
+        request.auth.credentials.userData) ||
+      null;
+    let payloadData = request.payload;
+    return new Promise((resolve, reject) => {
+      if (!UniversalFunctions.verifyEmailFormat(payloadData.emailId)) {
+        reject(
+          UniversalFunctions.sendError(
+            UniversalFunctions.CONFIG.APP_CONSTANTS.STATUS_MSG.ERROR
+              .INVALID_EMAIL_FORMAT
+          )
+        );
+      } else {
+        Controller.AdminBaseController.createUser(
+          userData,
+          payloadData,
+          function (err, data) {
+            if (!err) {
+              resolve(UniversalFunctions.sendSuccess(null, data));
+            } else {
+              reject(UniversalFunctions.sendError(err));
+            }
+          }
+        );
+      }
+    });
+  },
+  options: {
+    description: "Admin: Create User",
+    tags: ["api", "admin"],
+    auth: "UserAuth",
+    validate: {
+      payload: Joi.object({
+        firstName: Joi.string()
+          .regex(/^[a-zA-Z ]+$/)
+          .trim()
+          .min(2)
+          .required(),
+        lastName: Joi.string()
+          .regex(/^[a-zA-Z ]+$/)
+          .trim()
+          .min(2)
+          .required(),
+        emailId: Joi.string().required().min(5).trim(),
+        password: Joi.string().required().min(5).trim(),
+        phoneNumber: Joi.string()
+          .regex(/^[0-9]+$/)
+          .min(5)
+          .required(),
+      }).label("Admin: Create User"),
+      failAction: UniversalFunctions.failActionFunction,
+    },
+    plugins: {
+      "hapi-swagger": {
+        security: [{ admin: {} }],
+        responseMessages:
+          UniversalFunctions.CONFIG.APP_CONSTANTS
+            .swaggerDefaultResponseMessages,
+      },
+    },
+  },
+};
+
 export default [
   adminLogin,
   accessTokenLogin,
@@ -839,4 +911,5 @@ export default [
   createSchedule,
   getSchedule,
   deleteSchedule,
+  createUser,
 ];

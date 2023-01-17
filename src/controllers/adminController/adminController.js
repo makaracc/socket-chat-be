@@ -229,7 +229,7 @@ const createAdmin = function (userData, payloadData, callback) {
   );
 };
 
-const getAdmin = function (userData, callback) {
+const getAllAdmin = function (userData, callback) {
   let adminList = [];
   let userFound = false;
   async.series(
@@ -351,76 +351,6 @@ var blockUnblockAdmin = function (userData, payloadData, callback) {
     }
   );
 };
-
-// const createNurse = function (userData, payloadData, callback) {
-//   let newUserData;
-//   let userFound = false;
-//   async.series(
-//     [
-//       function (cb) {
-//         var criteria = {
-//           _id: userData.adminId,
-//         };
-//         Service.AdminService.getRecord(
-//           criteria,
-//           { password: 0 },
-//           {},
-//           function (err, data) {
-//             if (err) cb(err);
-//             else {
-//               if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
-//               else {
-//                 userFound = (data && data[0]) || null;
-//                 cb();
-//               }
-//             }
-//           }
-//         );
-//       },
-//       function (cb) {
-//         Service.UserService.getRecord(
-//           { username: payloadData.nurseId },
-//           {},
-//           {},
-//           function (err, data) {
-//             if (err) cb(err);
-//             else {
-//               if (data.length != 0) cb(ERROR.USER_ALREADY_REGISTERED);
-//               else cb();
-//             }
-//           }
-//         );
-//       },
-//       function (cb) {
-//         let dataToSave = {
-//           firstName: payloadData.firstName,
-//           lastName: payloadData.lastName,
-//           username: payloadData.nurseId,
-//           password: UniversalFunctions.CryptData(payloadData.password),
-//           dob: payloadData.dob,
-//           phoneNumber: encryptString(payloadData.phoneNumber),
-//           registrationDate: new Date().toISOString(),
-//           firstLogin: true,
-//           userType: Config.APP_CONSTANTS.DATABASE.USER_ROLES.NURSE,
-//         };
-//         Service.UserService.createRecord(dataToSave, function (err, data) {
-//           if (err) cb(err);
-//           else {
-//             newUserData = data;
-//             cb();
-//           }
-//         });
-//       },
-//     ],
-//     function (err, result) {
-//       if (err) callback(err);
-//       else
-//         callback(null, {
-//           userData: UniversalFunctions.processUserData(newUserData),
-//         });
-//     }
-//   );
-// };
 
 // const getPatients = (userData, callback) => {
 //   let userList = [];
@@ -1123,7 +1053,7 @@ const createSchedule = function (userData, payloadData, callback) {
  * @param {String} payloadData.description
  * @param {Function} callback
  */
-const getSchedule = function (userData, payloadData, callback) {
+const getAllSchedule = function (userData, payloadData, callback) {
   let userFound, shiftScheduleData;
   async.series(
     [
@@ -1163,7 +1093,6 @@ const getSchedule = function (userData, payloadData, callback) {
   );
 };
 
-// delete schedule from shift id
 const deleteSchedule = function (userData, payloadData, callback) {
   let userFound, shiftScheduleData;
   async.series(
@@ -1205,13 +1134,65 @@ const deleteSchedule = function (userData, payloadData, callback) {
   );
 };
 
+const createUser = function (userData, payloadData, callback) {
+  let newUserData;
+  let userFound = false;
+  async.series(
+    [
+      function (cb) {
+        var criteria = {
+          _id: userData.adminId,
+        };
+        Service.AdminService.getRecord(
+          criteria,
+          { password: 0 },
+          {},
+          function (err, data) {
+            if (err) cb(err);
+            else {
+              if (data.length == 0) cb(ERROR.INCORRECT_ACCESSTOKEN);
+              else {
+                userFound = (data && data[0]) || null;
+                cb();
+              }
+            }
+          }
+        );
+      },
+      function (cb) {
+        let dataToSave = {
+          firstName: payloadData.firstName,
+          lastName: payloadData.lastName,
+          emailId: payloadData.emailId,
+          password: UniversalFunctions.CryptData(payloadData.password),
+          phoneNumber: encryptString(payloadData.phoneNumber),
+          firstLogin: true,
+        };
+        Service.UserService.createRecord(dataToSave, function (err, data) {
+          if (err) cb(err);
+          else {
+            newUserData = data;
+            cb();
+          }
+        });
+      },
+    ],
+    function (err, result) {
+      if (err) callback(err);
+      else
+        callback(null, {
+          userData: UniversalFunctions.processUserData(newUserData),
+        });
+    }
+  );
+};
+
 export default {
   adminLogin,
   accessTokenLogin,
   createAdmin,
-  getAdmin,
+  getAllAdmin,
   blockUnblockAdmin,
-  // createNurse,
   // getPatients,
   // getNurses,
   blockUnblockUser,
@@ -1221,6 +1202,7 @@ export default {
   // createNurseShifts,
   // getNurseShifts,
   createSchedule,
-  getSchedule,
+  getAllSchedule,
   deleteSchedule,
+  createUser,
 };

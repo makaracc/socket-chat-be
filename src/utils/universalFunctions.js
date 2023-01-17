@@ -19,6 +19,10 @@ import StringCrypto from "string-crypto";
 
 const { encryptString, decryptString } = new StringCrypto();
 
+const encrypt = (string) => {
+  return encryptString(string, process.env.JWT_SECRET_KEY);
+};
+
 const sendError = (data) => {
   console.trace("ERROR OCCURED ", data);
   if (
@@ -91,6 +95,12 @@ const sendError = (data) => {
 
 var processUserData = function (userObj) {
   appLogger.info("obj>>", userObj);
+
+  userObj.phoneNumber = decryptString(
+    userObj.phoneNumber,
+    process.env.JWT_SECRET_KEY
+  );
+
   return userObj;
 };
 
@@ -289,6 +299,7 @@ const universalFunctions = {
   checkFileExtension,
   cleanObject,
   processUserData,
+  encryptString: encrypt,
 };
 
 export default universalFunctions;

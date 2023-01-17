@@ -6,5 +6,6 @@ export default {
   SchedulingService: new GenericService("Schedule"),
   AdminService: new GenericService("Admin"),
   TokenService: new GenericService("Token"),
+  UserService: new GenericService("User"),
   ForgetPasswordService,
 };
